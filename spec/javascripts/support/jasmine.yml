@@ -1,0 +1,16 @@
+src_files:
+    - 'components/jquery/*.js'
+    - 'src/**/*.js'
+
+stylesheets:
+
+helpers:
+  - 'helpers/**/*.js'
+
+spec_files:
+  - '**/*[sS]pec.js'
+
+src_dir:
+
+spec_dir:
+  - 'spec'
