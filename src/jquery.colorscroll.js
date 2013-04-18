@@ -12,6 +12,7 @@
 
 // TODO: Optimize everything, currently using too much resources
 // TODO: Add optional use of percentage for the positions, make 0 & 100% the default
+// TODO: Add option to the scrolling on an element other than the standard $(document)
 ;(function ($, window, undefined) {
     'use strict';
 
