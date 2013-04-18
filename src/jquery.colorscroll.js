@@ -10,39 +10,156 @@
  * http://opensource.org/licenses/MIT
  */
 
+// TODO: Optimize everything, currently using too much resources
+// TODO: Add optional use of percentage for the positions
 ;(function ($, window, undefined) {
+    'use strict';
 
-  // Create the defaults once
-  var pluginName = 'colorScroll',
-      document = window.document,
-      defaults = {
-        
-      };
+    // Create the defaults once
+    var pluginName = 'colorScroll',
+        document = window.document,
+        defaults = {
+            // Default colors are black & white
+            colors: [{
+                color: '#FFFFFF',
+                position: 500
+            }, {
+                color: '#000000',
+                position: 2000
+            }]
+        },
 
-  function Plugin(element, options) {
-    this.element = element;
+        rgbaSupport = (function() {
+            var elem = document.createElement('div');
+            var style = elem.style;
+            style.cssText = 'background-color:rgba(150,255,150,.5)';
 
-    // extend defaults with options given through the arguments
-    this.options = $.extend({}, defaults, options) ;
-    this._defaults = defaults;
-    this._name = pluginName;
+            return ('' + style.backgroundColor).indexOf('rgba') > -1;
+        }());
 
-    this.init();
-  }
+    function Plugin(element, options) {
+        this.element = element;
+        this.$element = $(element);
 
-  Plugin.prototype = {
-    
-    init: function() {
-        
+        // extend defaults with options given through the arguments
+        this.options = $.extend({}, defaults, options);
+        this._defaults = defaults;
+        this._name = pluginName;
+
+        this.init();
     }
-  };
 
-  $.fn[pluginName] = function (options) {
-    return this.each(function () {
-      if (!$.data(this, 'plugin_' + pluginName)) {
-        $.data(this, 'plugin_' + pluginName, new Plugin(this, options));
-      }
-    });
-  };
+    Plugin.prototype = {
+        init: function () {
+            // Sort array by position values
+            this.options.colors.sort(dynamicSort('position'));
+
+            // Set current color
+            this.currentColor = this.$element.css('background-color');
+
+            // Listen for scroll event on document
+            $(document).on('scroll', $.proxy(this.scrollHandler, this));
+        },
+
+        scrollHandler: function (event) {
+            var scrollAmount = $(document).scrollTop(),
+                pos1,
+                pos2,
+                color1,
+                color2;
+
+            if (scrollAmount <= this.options.colors[0].position) {
+                this.setColor(this.options.colors[0].color);
+            } else if (scrollAmount >= this.options.colors[this.options.colors.length - 1].position) {
+                this.setColor(this.options.colors[this.options.colors.length - 1].color);
+            } else {
+                // Get the position
+                for (var i = 0; i < this.options.colors.length; i++) {
+                    if (scrollAmount >= this.options.colors[i].position) {
+                        pos1 = this.options.colors[i].position;
+                        color1 = this.options.colors[i].color;
+                    } else {
+                        pos2 = this.options.colors[i].position;
+                        color2 = this.options.colors[i].color;
+                        break;
+                    }
+                }
+                // Calculate the relative amount scrolled
+                var relativePos = ((scrollAmount - pos1) / (pos2 - pos1));
+                // console.log('scrollAmount: ' + scrollAmount);
+                // console.log('pos1: ' + pos1);
+                // console.log('pos2: ' + pos2);
+                // console.log('color1: ' + color1);
+                // console.log('color2: ' + color2);
+                // console.log('position: ' + relativePos);
+
+                // Calculate new color value
+                var color = calculateColor(parseColor(color1), parseColor(color2), relativePos);
+                this.setColor(color);
+            }
+        },
+
+        setColor: function (newColor) {
+            if (newColor != this.currentColor) {
+                this.$element.css('background-color', newColor);
+                this.currentColor = newColor;
+            }
+        }
+    };
+
+    // Sort array by property
+    function dynamicSort(property) {
+        return function (a, b) {
+            return (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+        };
+    }
+
+    // Calculate an in-between color. Returns "#aabbcc"-like string.
+    function calculateColor(begin, end, pos) {
+        var color = 'rgb' + (rgbaSupport ? 'a' : '') + '(' + parseInt((begin[0] + pos * (end[0] - begin[0])), 10) + ',' + parseInt((begin[1] + pos * (end[1] - begin[1])), 10) + ',' + parseInt((begin[2] + pos * (end[2] - begin[2])), 10);
+        if (rgbaSupport) {
+            color += ',' + (begin && end ? parseFloat(begin[3] + pos * (end[3] - begin[3])) : 1);
+        }
+        color += ')';
+        console.log(color);
+        return color;
+    }
+
+    // Parse an CSS-syntax color. Outputs an array [r, g, b]
+    function parseColor(color) {
+        var match, parsed;
+
+        if ((match = /#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})/.exec(color))) {
+
+            // Match #aabbcc
+            parsed = [parseInt(match[1], 16), parseInt(match[2], 16), parseInt(match[3], 16), 1];
+
+        } else if ((match = /#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])/.exec(color))) {
+
+            // Match #abc
+            parsed = [parseInt(match[1], 16) * 17, parseInt(match[2], 16) * 17, parseInt(match[3], 16) * 17, 1];
+
+        } else if ((match = /rgb\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*\)/.exec(color))) {
+
+            // Match rgb(n, n, n)
+            parsed = [parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10), 1];
+
+        } else if ((match = /rgba\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9\.]*)\s*\)/.exec(color))) {
+
+            // Match rgba(n, n, n, n)
+            parsed = [parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10), parseFloat(match[4])];
+
+        }
+
+        return parsed;
+    }
+
+    $.fn[pluginName] = function (options) {
+        return this.each(function () {
+            if (!$.data(this, 'plugin_' + pluginName)) {
+                $.data(this, 'plugin_' + pluginName, new Plugin(this, options));
+            }
+        });
+    };
 
 }(jQuery, window));
