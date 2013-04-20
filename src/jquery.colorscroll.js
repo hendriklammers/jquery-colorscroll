@@ -3,6 +3,8 @@
  * A jQuery plugin that transitions the background color, when the user scrolls.
  * Version 0.2.0
  *
+ * https://github.com/hendriklammers/jquery-colorscroll
+ *
  * Copyright (c) 2013 Hendrik Lammers
  * http://www.hendriklammers.com
  *
@@ -10,9 +12,10 @@
  * http://opensource.org/licenses/MIT
  */
 
-// TODO: Optimize everything, currently using too much resources
+// TODO: Optimize everything, currently using too much sources
 // TODO: Add optional use of percentage for the positions, make 0 & 100% the default
 // TODO: Add option to the scrolling on an element other than the standard $(document)
+// TODO: Implement jquery-mousewheel plugin
 ;(function ($, window, undefined) {
     'use strict';
 
