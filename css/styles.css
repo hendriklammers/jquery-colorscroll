@@ -1,0 +1,21 @@
+body {
+    margin: 0;
+    font: 16px/24px Helvetica, sans-serif;
+}
+
+#wrap {
+    position: relative;
+    width: 760px;
+    height: 5000px;
+    margin: 0 auto;
+}
+
+.box {
+    position: fixed;
+    width: 400px;
+    height: 400px;
+    top: 100px;
+    left: 50%;
+    margin-left: -200px;
+    background-color: #FFFFFF;
+}
