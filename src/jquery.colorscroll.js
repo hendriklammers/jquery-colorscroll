@@ -12,10 +12,12 @@
  * http://opensource.org/licenses/MIT
  */
 
-// TODO: Optimize everything, currently using too much sources
+// TODO: Optimize everything
+// TODO: Calc. max scroll amount
 // TODO: Add optional use of percentage for the positions, make 0 & 100% the default
 // TODO: Add option to the scrolling on an element other than the standard $(document)
 // TODO: Implement jquery-mousewheel plugin
+// TODO: Handle window resize?
 ;(function ($, window, undefined) {
     'use strict';
 
@@ -30,7 +32,11 @@
             }, {
                 color: '#000000',
                 position: 2000
-            }]
+            }],
+            // The element to use for scroll events
+            scrollElement: $(document),
+            // Use standard browser scrolling (false) or use mouseWheel plugin (true)
+            fauxScroll: false
         },
 
         // rgba support check
@@ -107,10 +113,15 @@
             this.updateColor();
 
             // Listen for scroll event on document
-            $(document).on('scroll', $.proxy(this.updateColor, this));
+            this.options.scrollElement.on('scroll', $.proxy(this.updateColor, this));
         },
 
         updateColor: function() {
+
+            console.log('scrollTop: ' + $(document).scrollTop());
+            console.log('document height: ' + $(document).height());
+            console.log('window height: ' + $(window).height());
+
             var scrollAmount = $(document).scrollTop(),
                 pos1,
                 pos2,

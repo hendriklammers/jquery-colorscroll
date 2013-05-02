@@ -25,16 +25,33 @@
 			margin-left: -200px;
 			background-color: #FFFFFF;
 		}
+
+		#message {
+			position: fixed;
+			top: 50px;
+			left: 50px;
+			padding: 0.5em;
+			font-size: 24px;
+			line-height: 36px;
+			background: #FFF;
+		}
 	</style>
 </head>
 <body>
+	<div id="message"></div>
 	<div id="wrap"></div>
 	<div class="box"></div>
 
 	<!-- Javascripts -->
 	<script src="components/jquery/jquery.js"></script>	
+	<script src="components/jquery-mousewheel/jquery.mousewheel.js"></script>
 	<script src="src/jquery.colorscroll.js"></script>
 	<script>
+		// $('.box').on('mousewheel', function(event, delta, deltaX, deltaY) {
+		// 	console.log('delta X: ' + deltaX);
+		// 	console.log('delta Y: ' + deltaY);
+		// });
+
 		$('.box').colorScroll({
 			colors: [{
 				color: '#a2e9ff',
