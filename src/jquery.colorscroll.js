@@ -12,25 +12,30 @@
  * http://opensource.org/licenses/MIT
  */
 
-// TODO: Optimize everything, currently using too much sources
-// TODO: Add optional use of percentage for the positions, make 0 & 100% the default
+// TODO: Optimize everything
 // TODO: Add option to the scrolling on an element other than the standard $(document)
 // TODO: Implement jquery-mousewheel plugin
+// TODO: Handle window resize?
 ;(function ($, window, undefined) {
     'use strict';
 
     // Create the defaults once
     var pluginName = 'colorScroll',
         document = window.document,
+        $document = $(document),
         defaults = {
             // Default colors are black & white
             colors: [{
                 color: '#FFFFFF',
-                position: 0
+                position: '0%'
             }, {
                 color: '#000000',
-                position: 2000
-            }]
+                position: '100%'
+            }],
+            // The element to use for scroll events
+            scrollElement: $document,
+            // Use standard browser scrolling (false) or use mouseWheel plugin (true)
+            fauxScroll: false
         },
 
         // rgba support check
@@ -97,6 +102,8 @@
 
     Plugin.prototype = {
         init: function () {
+            this.convertPercentages();
+
             // Sort array by position values
             this.options.colors.sort(dynamicSort('position'));
 
@@ -107,11 +114,32 @@
             this.updateColor();
 
             // Listen for scroll event on document
-            $(document).on('scroll', $.proxy(this.updateColor, this));
+            this.options.scrollElement.on('scroll', $.proxy(this.updateColor, this));
+        },
+
+        convertPercentages: function() {
+            // The maximum value that can be scrolled
+            this.maxScrollAmount = $document.height() - $(window).height();
+
+            // Go through all colors
+            for (var i = 0; i < this.options.colors.length; i++) {
+                var pos = this.options.colors[i].position;
+
+                if (typeof pos === 'string') {
+                    if (pos.charAt(pos.length - 1) === '%') {
+                        // If it's a percentage convert to absolute value
+                        var per = parseFloat(pos);
+
+                        this.options.colors[i].position = Math.floor((per * this.maxScrollAmount) / 100);
+                    } else {
+                        this.options.colors[i].position = parseFloat(pos);
+                    }
+                }
+            }
         },
 
         updateColor: function() {
-            var scrollAmount = $(document).scrollTop(),
+            var scrollAmount = $document.scrollTop(),
                 pos1,
                 pos2,
                 color1,
