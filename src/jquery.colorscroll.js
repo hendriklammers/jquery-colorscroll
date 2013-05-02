@@ -12,7 +12,6 @@
  * http://opensource.org/licenses/MIT
  */
 
-// TODO: Optimize everything
 // TODO: Add option to the scrolling on an element other than the standard $(document)
 // TODO: Implement jquery-mousewheel plugin
 // TODO: Handle window resize?
