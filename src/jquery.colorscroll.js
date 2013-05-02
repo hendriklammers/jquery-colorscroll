@@ -13,8 +13,6 @@
  */
 
 // TODO: Optimize everything
-// TODO: Calc. max scroll amount
-// TODO: Add optional use of percentage for the positions, make 0 & 100% the default
 // TODO: Add option to the scrolling on an element other than the standard $(document)
 // TODO: Implement jquery-mousewheel plugin
 // TODO: Handle window resize?
@@ -29,7 +27,7 @@
             // Default colors are black & white
             colors: [{
                 color: '#FFFFFF',
-                position: 0
+                position: '0%'
             }, {
                 color: '#000000',
                 position: '100%'
@@ -104,8 +102,6 @@
 
     Plugin.prototype = {
         init: function () {
-            this.setMaxScroll();
-
             this.convertPercentages();
 
             // Sort array by position values
@@ -122,27 +118,28 @@
         },
 
         convertPercentages: function() {
+            // The maximum value that can be scrolled
+            this.maxScrollAmount = $document.height() - $(window).height();
+
             // Go through all colors
             for (var i = 0; i < this.options.colors.length; i++) {
                 var pos = this.options.colors[i].position;
 
                 if (typeof pos === 'string') {
                     if (pos.charAt(pos.length - 1) === '%') {
-                        // It's a percentage -> convert to absolute value
-                        var absolutePos = Math.floor((parseInt(pos, 10) * this.maxScrollAmount) / 100);
-                        this.options.colors[i].position = absolutePos;
+                        // If it's a percentage convert to absolute value
+                        var per = parseFloat(pos);
+
+                        this.options.colors[i].position = Math.floor((per * this.maxScrollAmount) / 100);
+                    } else {
+                        this.options.colors[i].position = parseFloat(pos);
                     }
                 }
             }
         },
 
-        setMaxScroll: function() {
-            this.maxScrollAmount = $document.height() - $(window).height();
-        },
-
         updateColor: function() {
             var scrollAmount = $document.scrollTop(),
-                scrollPercentage = Math.round((scrollAmount / this.maxScrollAmount) * 100),
                 pos1,
                 pos2,
                 color1,
