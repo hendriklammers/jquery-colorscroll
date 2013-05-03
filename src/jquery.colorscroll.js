@@ -14,7 +14,6 @@
 
 // TODO: Add option to the scrolling on an element other than the standard $(document)
 // TODO: Implement jquery-mousewheel plugin
-// TODO: Handle window resize?
 ;(function ($, window, undefined) {
     'use strict';
 
