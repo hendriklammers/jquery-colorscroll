@@ -14,7 +14,6 @@
 
 // TODO: Add option to the scrolling on an element other than the standard $(document)
 // TODO: Implement jquery-mousewheel plugin
-// TODO: Handle window resize?
 ;(function ($, window, undefined) {
     'use strict';
 
@@ -22,6 +21,7 @@
     var pluginName = 'colorScroll',
         document = window.document,
         $document = $(document),
+        $window = $(window),
         defaults = {
             // Default colors are black & white
             colors: [{
@@ -100,11 +100,11 @@
     }
 
     Plugin.prototype = {
-        init: function () {
-            this.convertPercentages();
+        colors: [],
 
-            // Sort array by position values
-            this.options.colors.sort(dynamicSort('position'));
+        init: function () {
+            // Initialize the positions of the colors
+            this.setPositions();
 
             // Set current color
             this.currentColor = this.$element.css('background-color');
@@ -112,29 +112,54 @@
             // Init color to match the current scroll position for the first time
             this.updateColor();
 
-            // Listen for scroll event on document
-            this.options.scrollElement.on('scroll', $.proxy(this.updateColor, this));
+            this.addListeners();
         },
 
-        convertPercentages: function() {
+        addListeners: function() {
+            var self = this;
+
+            // Listen for scroll event on document
+            this.options.scrollElement.on('scroll', $.proxy(this.updateColor, this));
+
+            // this.maxScrollAmount changes on browser resize
+            // Use smartresize plugin: https://github.com/louisremi/jquery-smartresize
+            $window.on('debouncedresize', function() {
+                // Update new positions
+                self.setPositions();
+                self.updateColor();
+            });
+        },
+
+        setPositions: function() {
             // The maximum value that can be scrolled
-            this.maxScrollAmount = $document.height() - $(window).height();
+            this.maxScrollAmount = $document.height() - $window.height();
+
+            // Create array to fill with converted positions
+            this.colors = new Array(this.options.colors.length);
 
             // Go through all colors
             for (var i = 0; i < this.options.colors.length; i++) {
-                var pos = this.options.colors[i].position;
+                var obj = {},
+                    pos = this.options.colors[i].position;
+
+                obj.color = this.options.colors[i].color;
 
                 if (typeof pos === 'string') {
                     if (pos.charAt(pos.length - 1) === '%') {
                         // If it's a percentage convert to absolute value
-                        var per = parseFloat(pos);
-
-                        this.options.colors[i].position = Math.floor((per * this.maxScrollAmount) / 100);
+                        obj.position = Math.floor((parseFloat(pos) * this.maxScrollAmount) / 100);
                     } else {
-                        this.options.colors[i].position = parseFloat(pos);
+                        obj.position = parseFloat(pos);
                     }
+                } else {
+                    obj.position = pos;
                 }
+
+                this.colors[i] = obj;
             }
+
+            // Sort array by position values
+            this.colors.sort(dynamicSort('position'));
         },
 
         updateColor: function() {
@@ -144,22 +169,22 @@
                 color1,
                 color2;
 
-            if (scrollAmount <= this.options.colors[0].position) {
+            if (scrollAmount <= this.colors[0].position) {
                 // Use the first color the the colors array
-                this.setColor(this.options.colors[0].color);
-            } else if (scrollAmount >= this.options.colors[this.options.colors.length - 1].position) {
+                this.setColor(this.colors[0].color);
+            } else if (scrollAmount >= this.colors[this.colors.length - 1].position) {
                 // Use the last color the the colors array
-                this.setColor(this.options.colors[this.options.colors.length - 1].color);
+                this.setColor(this.colors[this.colors.length - 1].color);
             } else {
                 // Get the position
-                for (var i = 0; i < this.options.colors.length; i++) {
+                for (var i = 0; i < this.colors.length; i++) {
                     // Find out between which 2 colors we currently are
-                    if (scrollAmount >= this.options.colors[i].position) {
-                        pos1 = this.options.colors[i].position;
-                        color1 = this.options.colors[i].color;
+                    if (scrollAmount >= this.colors[i].position) {
+                        pos1 = this.colors[i].position;
+                        color1 = this.colors[i].color;
                     } else {
-                        pos2 = this.options.colors[i].position;
-                        color2 = this.options.colors[i].color;
+                        pos2 = this.colors[i].position;
+                        color2 = this.colors[i].color;
                         break;
                     }
                 }
@@ -173,7 +198,7 @@
         },
 
         setColor: function (newColor) {
-            if (newColor != this.currentColor) {
+            if (newColor !== this.currentColor) {
                 this.$element.css('background-color', newColor);
                 this.currentColor = newColor;
             }
@@ -189,3 +214,51 @@
     };
 
 }(jQuery, window));
+
+/*
+ * debouncedresize: special jQuery event that happens once after a window resize
+ *
+ * latest version and complete README available on Github:
+ * https://github.com/louisremi/jquery-smartresize
+ *
+ * Copyright 2012 @louis_remi
+ * Licensed under the MIT license.
+ *
+ * This saved you an hour of work? 
+ * Send me music http://www.amazon.co.uk/wishlist/HNTU0468LQON
+ */
+(function($) {
+
+var $event = $.event,
+    $special,
+    resizeTimeout;
+
+$special = $event.special.debouncedresize = {
+    setup: function() {
+        $( this ).on( "resize", $special.handler );
+    },
+    teardown: function() {
+        $( this ).off( "resize", $special.handler );
+    },
+    handler: function( event, execAsap ) {
+        // Save the context
+        var context = this,
+            args = arguments,
+            dispatch = function() {
+                // set correct event type
+                event.type = "debouncedresize";
+                $event.dispatch.apply( context, args );
+            };
+
+        if ( resizeTimeout ) {
+            clearTimeout( resizeTimeout );
+        }
+
+        execAsap ?
+            dispatch() :
+            resizeTimeout = setTimeout( dispatch, $special.threshold );
+    },
+    threshold: 150
+};
+
+})(jQuery);
