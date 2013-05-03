@@ -22,6 +22,7 @@
     var pluginName = 'colorScroll',
         document = window.document,
         $document = $(document),
+        $window = $(window),
         defaults = {
             // Default colors are black & white
             colors: [{
@@ -100,11 +101,11 @@
     }
 
     Plugin.prototype = {
-        init: function () {
-            this.convertPercentages();
+        colors: [],
 
-            // Sort array by position values
-            this.options.colors.sort(dynamicSort('position'));
+        init: function () {
+            // Initialize the positions of the colors
+            this.setPositions();
 
             // Set current color
             this.currentColor = this.$element.css('background-color');
@@ -112,29 +113,46 @@
             // Init color to match the current scroll position for the first time
             this.updateColor();
 
-            // Listen for scroll event on document
-            this.options.scrollElement.on('scroll', $.proxy(this.updateColor, this));
+            this.addListeners();
         },
 
-        convertPercentages: function() {
+        addListeners: function() {
+            var self = this;
+
+            // Listen for scroll event on document
+            this.options.scrollElement.on('scroll', $.proxy(this.updateColor, this));
+
+            // this.maxScrollAmount changes on browser resize
+            $window.on('resize', function() {
+                // FIXME: Recalculate color positions on browser resize
+            });
+        },
+
+        setPositions: function() {
             // The maximum value that can be scrolled
-            this.maxScrollAmount = $document.height() - $(window).height();
+            this.maxScrollAmount = $document.height() - $window.height();
+
+            // Separate colors array from the options object
+            this.colors = this.options.colors;
 
             // Go through all colors
-            for (var i = 0; i < this.options.colors.length; i++) {
-                var pos = this.options.colors[i].position;
+            for (var i = 0; i < this.colors.length; i++) {
+                var pos = this.colors[i].position;
 
                 if (typeof pos === 'string') {
                     if (pos.charAt(pos.length - 1) === '%') {
                         // If it's a percentage convert to absolute value
                         var per = parseFloat(pos);
 
-                        this.options.colors[i].position = Math.floor((per * this.maxScrollAmount) / 100);
+                        this.colors[i].position = Math.floor((per * this.maxScrollAmount) / 100);
                     } else {
-                        this.options.colors[i].position = parseFloat(pos);
+                        this.colors[i].position = parseFloat(pos);
                     }
                 }
             }
+
+            // Sort array by position values
+            this.colors.sort(dynamicSort('position'));
         },
 
         updateColor: function() {
@@ -144,22 +162,22 @@
                 color1,
                 color2;
 
-            if (scrollAmount <= this.options.colors[0].position) {
+            if (scrollAmount <= this.colors[0].position) {
                 // Use the first color the the colors array
-                this.setColor(this.options.colors[0].color);
-            } else if (scrollAmount >= this.options.colors[this.options.colors.length - 1].position) {
+                this.setColor(this.colors[0].color);
+            } else if (scrollAmount >= this.colors[this.colors.length - 1].position) {
                 // Use the last color the the colors array
-                this.setColor(this.options.colors[this.options.colors.length - 1].color);
+                this.setColor(this.colors[this.colors.length - 1].color);
             } else {
                 // Get the position
-                for (var i = 0; i < this.options.colors.length; i++) {
+                for (var i = 0; i < this.colors.length; i++) {
                     // Find out between which 2 colors we currently are
-                    if (scrollAmount >= this.options.colors[i].position) {
-                        pos1 = this.options.colors[i].position;
-                        color1 = this.options.colors[i].color;
+                    if (scrollAmount >= this.colors[i].position) {
+                        pos1 = this.colors[i].position;
+                        color1 = this.colors[i].color;
                     } else {
-                        pos2 = this.options.colors[i].position;
-                        color2 = this.options.colors[i].color;
+                        pos2 = this.colors[i].position;
+                        color2 = this.colors[i].color;
                         break;
                     }
                 }
