@@ -1,7 +1,7 @@
 /*
  * colorScroll - jQuery plugin
  * A jQuery plugin that transitions the background color, when the user scrolls.
- * Version 0.2.0
+ * Version 0.3.0
  *
  * https://github.com/hendriklammers/jquery-colorscroll
  *
