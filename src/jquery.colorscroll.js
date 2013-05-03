@@ -132,10 +132,8 @@
 
         setPositions: function() {
             // The maximum value that can be scrolled
-            this.maxScrollAmount = $document.height() - $window.height();
-
-            // Create array to fill with converted positions
-            this.colors = new Array(this.options.colors.length);
+            var maxScrollAmount = $document.height() - $window.height(),
+                colors = [];
 
             // Go through all colors
             for (var i = 0; i < this.options.colors.length; i++) {
@@ -147,7 +145,7 @@
                 if (typeof pos === 'string') {
                     if (pos.charAt(pos.length - 1) === '%') {
                         // If it's a percentage convert to absolute value
-                        obj.position = Math.floor((parseFloat(pos) * this.maxScrollAmount) / 100);
+                        obj.position = Math.floor((parseFloat(pos) * maxScrollAmount) / 100);
                     } else {
                         obj.position = parseFloat(pos);
                     }
@@ -155,11 +153,13 @@
                     obj.position = pos;
                 }
 
-                this.colors[i] = obj;
+                colors.push(obj);
             }
 
             // Sort array by position values
-            this.colors.sort(dynamicSort('position'));
+            colors.sort(dynamicSort('position'));
+
+            this.colors = colors;
         },
 
         updateColor: function() {
