@@ -1,24 +1,26 @@
 colorScroll
 ===========
 
-https://github.com/hendriklammers/jquery-colorscroll
+A jQuery plugin that changes the background color of an element, based on the scroll position of the document.  
 
-A jQuery plugin that changes the background color of an element, based on the scroll position.
+Currently it only works as scroll event on the document. So if the document's height doesn't exceed the window's height 
+(i.e. There's nothing to scroll), no color transitions will be done.
 
 Usage
 -----
 Call colorScroll on the element to which you want to apply the color transitions.  
+For example to change the **background-color** of the **body** element you could use the plugin like this:
 ```js
 $('body').colorScroll({
     colors: [{
         color: '#a2e9ff',
-        position: '10%'
+        position: '0%'
     }, {
         color: '#ff92f2',
-        position: '50%'
+        position: '40%'
     }, {
         color: '#fff094',
-        position: '90%'
+        position: '80%'
     }]
 });
 ```
