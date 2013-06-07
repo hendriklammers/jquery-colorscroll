@@ -66,7 +66,7 @@
             return color;
         },
 
-        // Parse a CSS-syntax color. Outputs an array [r, g, b]
+        // Parse a CSS-syntax color. Outputs an array [r, g, b, a]
         parseColor = function(color) {
             var match, parsed;
 
