@@ -24,3 +24,8 @@ $('body').colorScroll({
     }]
 });
 ```
+
+Example
+-------
+A very basic example of the plugin in action can be found here:
+http://hendriklammers.github.io/jquery-colorscroll
