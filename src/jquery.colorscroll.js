@@ -14,6 +14,7 @@
 
 // TODO: Add option to the scrolling on an element other than the standard $(document)
 // TODO: Implement jquery-mousewheel plugin
+// TODO: Add events
 ;(function ($, window, undefined) {
     'use strict';
 
@@ -224,7 +225,7 @@
  * Copyright 2012 @louis_remi
  * Licensed under the MIT license.
  *
- * This saved you an hour of work? 
+ * This saved you an hour of work?
  * Send me music http://www.amazon.co.uk/wishlist/HNTU0468LQON
  */
 (function($) {
