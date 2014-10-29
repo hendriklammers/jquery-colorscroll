@@ -11,5 +11,8 @@
     "test",
     "spec",
     "package.json"
-  ]
+  ],
+  "dependencies": {
+    "jquery": ">=1.7"
+  }
 }
