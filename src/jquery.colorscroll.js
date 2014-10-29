@@ -12,10 +12,23 @@
  * http://opensource.org/licenses/MIT
  */
 
+// TODO: Make available to AMD and commonjs
 // TODO: Add option to the scrolling on an element other than the standard $(document)
 // TODO: Implement jquery-mousewheel plugin
 // TODO: Add events
-;(function ($, window, undefined) {
+
+(function (factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(['jquery'], factory);
+    } else if (typeof exports === 'object') {
+        // Node/CommonJS
+        factory(require('jquery'));
+    } else {
+        // Browser globals
+        factory(jQuery);
+    }
+}(function ($) {
     'use strict';
 
     // Create the defaults once
@@ -213,8 +226,7 @@
             }
         });
     };
-
-}(jQuery, window));
+}));
 
 /*
  * debouncedresize: special jQuery event that happens once after a window resize
