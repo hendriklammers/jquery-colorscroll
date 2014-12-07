@@ -12,10 +12,10 @@
  * http://opensource.org/licenses/MIT
  */
 
-// TODO: Make available to AMD and commonjs
+// TODO: Make available to AMD and commonjs. Done but should be tested
 // TODO: Add option to the scrolling on an element other than the standard $(document)
-// TODO: Implement jquery-mousewheel plugin
 // TODO: Add events
+// TODO: Create unit tests
 
 (function (factory) {
     if (typeof define === 'function' && define.amd) {
@@ -48,7 +48,8 @@
             // The element to use for scroll events
             scrollElement: $document,
             // Use standard browser scrolling (false) or use mouseWheel plugin (true)
-            fauxScroll: false
+            fauxScroll: false,
+            colorChange: undefined
         },
 
         // rgba support check
@@ -208,6 +209,11 @@
                 // Calculate new color value and set it using setColor
                 var color = calculateColor(parseColor(color1), parseColor(color2), relativePos);
                 this.setColor(color);
+            }
+
+            // Check if if one of the positions is reached
+            for (var i = 0; i < this.colors.length; i++) {
+                console.log(scrollAmount === this.colors[i].position);
             }
         },
 
