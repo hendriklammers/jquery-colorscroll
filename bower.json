@@ -12,5 +12,8 @@
   ],
   "dependencies": {
     "jquery": ">=1.7"
+  },
+  "devDependencies": {
+    "jquery": "~2.1.1"
   }
 }
