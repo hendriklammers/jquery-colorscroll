@@ -17,10 +17,10 @@
 // TODO: Add events
 // TODO: Create unit tests
 // TODO: Create decent sample page
-// TODO: Pass jshint
 // TODO: Update repo with Gulp task
 
 (function (factory) {
+    'use strict';
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         define(['jquery'], factory);
@@ -244,6 +244,7 @@
  * Send me music http://www.amazon.co.uk/wishlist/HNTU0468LQON
  */
 (function($) {
+    'use strict';
 
 var $event = $.event,
     $special,
@@ -270,9 +271,11 @@ $special = $event.special.debouncedresize = {
             clearTimeout( resizeTimeout );
         }
 
-        execAsap ?
-            dispatch() :
+        if (execAsap) {
+            dispatch();
+        } else {
             resizeTimeout = setTimeout( dispatch, $special.threshold );
+        }
     },
     threshold: 150
 };
