@@ -1,16 +1,24 @@
 {
-    "name": "jquery-colorscroll",
-    "version": "0.3.0",
-    "description": "Query plugin that changes the background color of an element, based on the scroll position of the document.",
-    "main": "jquery.colorscroll.js",
-    "repository": {
-        "type": "git",
-        "url": "git://github.com/hendriklammers/jquery-colorscroll.git"
-    },
-    "keywords": [
-        "colors",
-        "scroll",
-        "jquery-plugin"
-    ],
-    "license": "MIT"
+  "name": "jquery-colorscroll",
+  "version": "0.3.0",
+  "description": "Query plugin that changes the background color of an element, based on the scroll position of the document.",
+  "main": "jquery.colorscroll.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/hendriklammers/jquery-colorscroll.git"
+  },
+  "keywords": [
+    "colors",
+    "scroll",
+    "jquery-plugin"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "del": "^1.1.0",
+    "gulp": "^3.8.10",
+    "gulp-jshint": "^1.9.0",
+    "gulp-rename": "^1.2.0",
+    "gulp-uglify": "^1.0.2",
+    "jshint-stylish": "^1.0.0"
+  }
 }
