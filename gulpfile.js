@@ -12,8 +12,9 @@ gulp.task('jshint', function() {
         .pipe(jshint.reporter('jshint-stylish'));
 });
 
-gulp.task('compress', function() {
+gulp.task('minify', function() {
     return gulp.src('src/*.js')
+        .pipe(gulp.dest('dist'))
         .pipe(uglify())
         .pipe(rename({suffix: '.min'}))
         .pipe(gulp.dest('dist'));
@@ -27,7 +28,6 @@ gulp.task('clean', function() {
     del('dist');
 });
 
-gulp.task('build', ['clean', 'jshint', 'compress'], function() {
-    gulp.src('src/*.js')
-        .pipe(gulp.dest('dist'));
+gulp.task('build', ['clean', 'jshint', 'minify'], function() {
+    // Nothing here...
 });
