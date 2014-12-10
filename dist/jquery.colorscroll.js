@@ -1,7 +1,9 @@
 /*
  * colorScroll - jQuery plugin
  * A jQuery plugin that transitions the background color, when the user scrolls.
- * Version 0.2.0
+ * Version 0.3.0
+ *
+ * https://github.com/hendriklammers/jquery-colorscroll
  *
  * Copyright (c) 2013 Hendrik Lammers
  * http://www.hendriklammers.com
@@ -10,24 +12,46 @@
  * http://opensource.org/licenses/MIT
  */
 
-// TODO: Optimize everything, currently using too much resources
-// TODO: Add optional use of percentage for the positions, make 0 & 100% the default
+// TODO: Make available to AMD and commonjs. Done but should be tested
 // TODO: Add option to the scrolling on an element other than the standard $(document)
-;(function ($, window, undefined) {
+// TODO: Add events
+// TODO: Create unit tests
+// TODO: Create decent sample page
+// TODO: Update repo with Gulp task
+
+(function (factory) {
+    'use strict';
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(['jquery'], factory);
+    } else if (typeof exports === 'object') {
+        // Node/CommonJS
+        factory(require('jquery'));
+    } else {
+        // Browser globals
+        factory(jQuery);
+    }
+}(function ($) {
     'use strict';
 
     // Create the defaults once
     var pluginName = 'colorScroll',
         document = window.document,
+        $document = $(document),
+        $window = $(window),
         defaults = {
             // Default colors are black & white
             colors: [{
                 color: '#FFFFFF',
-                position: 0
+                position: '0%'
             }, {
                 color: '#000000',
-                position: 2000
-            }]
+                position: '100%'
+            }],
+            // The element to use for scroll events
+            scrollElement: $document,
+            // Use standard browser scrolling (false) or use mouseWheel plugin (true)
+            fauxScroll: false
         },
 
         // rgba support check
@@ -59,7 +83,7 @@
             return color;
         },
 
-        // Parse an CSS-syntax color. Outputs an array [r, g, b]
+        // Parse a CSS-syntax color. Outputs an array [r, g, b, a]
         parseColor = function(color) {
             var match, parsed;
 
@@ -93,9 +117,11 @@
     }
 
     Plugin.prototype = {
+        colors: [],
+
         init: function () {
-            // Sort array by position values
-            this.options.colors.sort(dynamicSort('position'));
+            // Initialize the positions of the colors
+            this.setPositions();
 
             // Set current color
             this.currentColor = this.$element.css('background-color');
@@ -103,33 +129,79 @@
             // Init color to match the current scroll position for the first time
             this.updateColor();
 
+            this.addListeners();
+        },
+
+        addListeners: function() {
+            var self = this;
+
             // Listen for scroll event on document
-            $(document).on('scroll', $.proxy(this.updateColor, this));
+            this.options.scrollElement.on('scroll', $.proxy(this.updateColor, this));
+
+            // this.maxScrollAmount changes on browser resize
+            // Use smartresize plugin: https://github.com/louisremi/jquery-smartresize
+            $window.on('debouncedresize', function() {
+                // Update new positions
+                self.setPositions();
+                self.updateColor();
+            });
+        },
+
+        setPositions: function() {
+            // The maximum value that can be scrolled
+            var maxScrollAmount = $document.height() - $window.height(),
+                colors = [];
+
+            // Go through all colors
+            for (var i = 0; i < this.options.colors.length; i++) {
+                var obj = {},
+                    pos = this.options.colors[i].position;
+
+                obj.color = this.options.colors[i].color;
+
+                if (typeof pos === 'string') {
+                    if (pos.charAt(pos.length - 1) === '%') {
+                        // If it's a percentage convert to absolute value
+                        obj.position = Math.floor((parseFloat(pos) * maxScrollAmount) / 100);
+                    } else {
+                        obj.position = parseFloat(pos);
+                    }
+                } else {
+                    obj.position = pos;
+                }
+
+                colors.push(obj);
+            }
+
+            // Sort array by position values
+            colors.sort(dynamicSort('position'));
+
+            this.colors = colors;
         },
 
         updateColor: function() {
-            var scrollAmount = $(document).scrollTop(),
+            var scrollAmount = $document.scrollTop(),
                 pos1,
                 pos2,
                 color1,
                 color2;
 
-            if (scrollAmount <= this.options.colors[0].position) {
+            if (scrollAmount <= this.colors[0].position) {
                 // Use the first color the the colors array
-                this.setColor(this.options.colors[0].color);
-            } else if (scrollAmount >= this.options.colors[this.options.colors.length - 1].position) {
+                this.setColor(this.colors[0].color);
+            } else if (scrollAmount >= this.colors[this.colors.length - 1].position) {
                 // Use the last color the the colors array
-                this.setColor(this.options.colors[this.options.colors.length - 1].color);
+                this.setColor(this.colors[this.colors.length - 1].color);
             } else {
                 // Get the position
-                for (var i = 0; i < this.options.colors.length; i++) {
+                for (var i = 0; i < this.colors.length; i++) {
                     // Find out between which 2 colors we currently are
-                    if (scrollAmount >= this.options.colors[i].position) {
-                        pos1 = this.options.colors[i].position;
-                        color1 = this.options.colors[i].color;
+                    if (scrollAmount >= this.colors[i].position) {
+                        pos1 = this.colors[i].position;
+                        color1 = this.colors[i].color;
                     } else {
-                        pos2 = this.options.colors[i].position;
-                        color2 = this.options.colors[i].color;
+                        pos2 = this.colors[i].position;
+                        color2 = this.colors[i].color;
                         break;
                     }
                 }
@@ -143,7 +215,7 @@
         },
 
         setColor: function (newColor) {
-            if (newColor != this.currentColor) {
+            if (newColor !== this.currentColor) {
                 this.$element.css('background-color', newColor);
                 this.currentColor = newColor;
             }
@@ -157,5 +229,55 @@
             }
         });
     };
+}));
 
-}(jQuery, window));
+/*
+ * debouncedresize: special jQuery event that happens once after a window resize
+ *
+ * latest version and complete README available on Github:
+ * https://github.com/louisremi/jquery-smartresize
+ *
+ * Copyright 2012 @louis_remi
+ * Licensed under the MIT license.
+ *
+ * This saved you an hour of work?
+ * Send me music http://www.amazon.co.uk/wishlist/HNTU0468LQON
+ */
+(function($) {
+    'use strict';
+
+var $event = $.event,
+    $special,
+    resizeTimeout;
+
+$special = $event.special.debouncedresize = {
+    setup: function() {
+        $( this ).on( "resize", $special.handler );
+    },
+    teardown: function() {
+        $( this ).off( "resize", $special.handler );
+    },
+    handler: function( event, execAsap ) {
+        // Save the context
+        var context = this,
+            args = arguments,
+            dispatch = function() {
+                // set correct event type
+                event.type = "debouncedresize";
+                $event.dispatch.apply( context, args );
+            };
+
+        if ( resizeTimeout ) {
+            clearTimeout( resizeTimeout );
+        }
+
+        if (execAsap) {
+            dispatch();
+        } else {
+            resizeTimeout = setTimeout( dispatch, $special.threshold );
+        }
+    },
+    threshold: 150
+};
+
+})(jQuery);
