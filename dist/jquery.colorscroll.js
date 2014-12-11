@@ -14,10 +14,11 @@
 
 // TODO: Make available to AMD and commonjs. Done but should be tested
 // TODO: Add option to the scrolling on an element other than the standard $(document)
-// TODO: Add events
+// TODO: Add option to use on any CSS property that accept a color value
+// TODO: Add callback function
 // TODO: Create unit tests
 // TODO: Create decent sample page
-// TODO: Update repo with Gulp task
+// TODO: Proper versioning
 
 (function (factory) {
     'use strict';
@@ -39,6 +40,9 @@
         document = window.document,
         $document = $(document),
         $window = $(window),
+        events = {
+            UPDATE: 'update.colorScroll'
+        },
         defaults = {
             // Default colors are black & white
             colors: [{
@@ -218,6 +222,9 @@
             if (newColor !== this.currentColor) {
                 this.$element.css('background-color', newColor);
                 this.currentColor = newColor;
+
+                // Trigger event with the color value
+                this.$element.trigger(events.UPDATE, {color: newColor});
             }
         }
     };

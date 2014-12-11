@@ -1,8 +1,10 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
 	<title>jQuery colorScroll plugin</title>
+    <meta name="description" content="jQuery plugin that changes color on scroll">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<style>
 		body {
 			margin: 0;
@@ -31,7 +33,6 @@
 	<div id="wrap"></div>
 	<div class="box"></div>
 
-	<!-- Javascripts -->
 	<script src="bower_components/jquery/dist/jquery.min.js"></script>
 	<script src="src/jquery.colorscroll.js"></script>
 	<script>
@@ -52,9 +53,11 @@
 				color: '#92b3ff',
 				position: '60%'
 			}]
-		});
+        }).on('update.colorScroll', function(event, data) {
+            console.log(data.color);
+        });
 
-		$('body').colorScroll();
+		// $('body').colorScroll();
 	</script>
 </body>
 </html>

@@ -39,6 +39,9 @@
         document = window.document,
         $document = $(document),
         $window = $(window),
+        events = {
+            UPDATE: 'update.colorScroll'
+        },
         defaults = {
             // Default colors are black & white
             colors: [{
@@ -218,6 +221,9 @@
             if (newColor !== this.currentColor) {
                 this.$element.css('background-color', newColor);
                 this.currentColor = newColor;
+
+                // Trigger event with the color value
+                this.$element.trigger(events.UPDATE, {color: newColor});
             }
         }
     };
