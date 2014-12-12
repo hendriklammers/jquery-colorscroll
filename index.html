@@ -52,9 +52,10 @@
 			}, {
 				color: '#92b3ff',
 				position: '60%'
-			}]
-        }).on('update.colorScroll', function(event, data) {
-            console.log(data.color);
+            }],
+            colorChange: function(data) {
+                console.log(data);
+            }
         });
 
 		// $('body').colorScroll();

@@ -55,7 +55,8 @@
             // The element to use for scroll events
             scrollElement: $document,
             // Use standard browser scrolling (false) or use mouseWheel plugin (true)
-            fauxScroll: false
+            fauxScroll: false,
+            colorChange: undefined
         },
 
         // rgba support check
@@ -225,6 +226,11 @@
 
                 // Trigger event with the color value
                 this.$element.trigger(events.UPDATE, {color: newColor});
+
+                // Trigger callback function
+                if (this.options.colorChange) {
+                    this.options.colorChange(newColor);
+                }
             }
         }
     };
